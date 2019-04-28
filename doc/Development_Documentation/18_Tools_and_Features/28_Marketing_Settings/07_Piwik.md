@@ -50,6 +50,9 @@ functionality. To use this integration, you need to configure the Matomo usernam
 of its password (not the plain text password itself!). Similar to the report token, you should use a user with **view only**
 permissions here. 
 
+Further more, you might need to enable the setting `enable_framed_pages` in the Matomo config (see
+[Matomo FAQ](https://matomo.org/faq/troubleshooting/faq_147/)) to allow the iframe to be displayed.
+
 After the iframe integration is configured, you'll find a new menu entry in the marketing menu:
 
 ![Matomo Iframe integration](../../img/piwik_iframe_integration.png)
@@ -77,8 +80,8 @@ string in the *API Integration* section:
 If you want to influence the generated tracking code, you have multiple possibilities to do so. The tracker code is divided
 into multiple code blocks which can be expanded and altered individually. As reference, please see:
 
-* the definition of available blocks in the [Tracker implementation](https://github.com/pimcore/pimcore/blob/master/pimcore/lib/Pimcore/Analytics/Piwik/Tracker.php#L63)
-* the [template](https://github.com/pimcore/pimcore/blob/master/pimcore/lib/Pimcore/Bundle/CoreBundle/Resources/views/Analytics/Tracking/Piwik/trackingCode.html.twig)
+* the definition of available blocks in the [Tracker implementation](https://github.com/pimcore/pimcore/blob/master/lib/Analytics/Piwik/Tracker.php#L63)
+* the [template](https://github.com/pimcore/pimcore/blob/master/bundles/CoreBundle/Resources/views/Analytics/Tracking/Piwik/trackingCode.html.twig)
   which defines where the content of each blocks is rendered
 
 ### Adding code to a block

@@ -41,7 +41,7 @@ server {
     # Stay secure
     #
     # a) don't allow PHP in folders allowing file uploads
-    location ~* /var/assets/*\.php(/|$) {
+    location ~* /var/assets/.*\.php(/|$) {
         return 404;
     }
     # b) Prevent clients from accessing hidden files (starting with a dot)
@@ -74,18 +74,12 @@ server {
 
     # Assets
     # Still use a whitelist approach to prevent each and every missing asset to go through the PHP Engine.
-    location ~* (.+?)\.((?:css|js)(?:\.map)?|jpe?g|gif|png|svgz?|eps|exe|gz|zip|mp\d|ogg|ogv|webm|pdf|docx?|xlsx?|pptx?)$ {
+    location ~* ^(?!/admin/asset/webdav/)(.+?)\.((?:css|js)(?:\.map)?|jpe?g|gif|png|svgz?|eps|exe|gz|zip|mp\d|ogg|ogv|webm|pdf|docx?|xlsx?|pptx?)$ {
         try_files /var/assets$uri $uri =404;
         expires 2w;
         access_log off;
         log_not_found off;
         add_header Cache-Control "public";
-    }
-
-    # Installer
-    # Remove this if you don't need the web installer (anymore)
-    if (-f $document_root/install.php) {
-        rewrite ^/install(/?.*) /install.php last;
     }
 
     location / {

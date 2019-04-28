@@ -88,7 +88,12 @@ $entries->setCondition("name LIKE ?", ["%bernie%"]); // use prepared statements!
 $entries->setCondition("name LIKE :name", ["name" => "%bernie%"]); // With PDO_Mysql you can use named parameters
 // to add param to the condition (until build 181 this cannot be used with setCondition in the same listing, you should use setCondition OR addConditionParam but not both)
 $entries->addConditionParam("city = ?", "New York", "AND"); // concatenator can be AND or OR
-   
+
+//use array bindings for prepared statements (since version 5.8.0)
+$entries->setCondition("city IN (?)", [["New York", "Chicago"]]);
+// or
+$entries->setCondition("city IN (:cities)", ["cities" => ["New York", "Chicago"]]); // named parameters
+
 //if necessary you can of course custom build your query
 $entries->setCondition("name LIKE " . $entries->quote("%bernie%")); // make sure that you quote variables in conditions!
 foreach ($entries as $entry) {
@@ -155,7 +160,7 @@ $entries->load();
 foreach($entries as $entry) {...}
  
  
-// using named placeholders (recommended) - only with PDO Mysql Adapter
+// using named placeholders (recommended)
 $entries = new DataObject\Myclassname\Listing();
 $entries->setCondition("name LIKE :name AND date > :date", ["name" => "%bernie%", "date" => time()]);
 $entries->load();
@@ -167,7 +172,7 @@ Following code will only search the EN value of the field `name`.
 <?php
 
 $entries = new \Pimcore\Model\DataObject\Myclassname\Listing();
-$entries->setLocale("en"); // string or instance of Zend_Locale
+$entries->setLocale("en");
 $entries->setCondition("name LIKE :name", ["name" => "%term%"]); // name is a field inside a localized field container
 ```
 
@@ -350,10 +355,10 @@ public function testAction( Request $request )
 <br />
  
 <!-- pagination start -->
-<?= $this->paginationControl($this->paginator, 'Sliding', 'includes/paging.php', [
-   'urlprefix' => $this->document->getFullPath() . '?page=', // just example (this parameter could be used in paging.php to construct the URL)
-   'appendQueryString' => true // just example (this parameter could be used in paging.php to construct the URL)
-]); ?>
+<?=     $this->render("Backend/Includes/paging.html.php", get_object_vars($this->paginator->getPages("Sliding")), [
+       'urlprefix' => $this->document->getFullPath() . '?page=', // just example (this parameter could be used in paging.php to construct the URL)
+       'appendQueryString' => true // just example (this parameter could be used in paging.php to construct the URL)
+    ]); ?>
 <!-- pagination end -->
 ```
 
@@ -362,25 +367,25 @@ public function testAction( Request $request )
 <div>
     <ul class="pagination">
         <!-- First page link -->
-        <li class="<?= (!isset($this->previous)) ? 'disabled' : ''; ?>"><a href="<?= $this->url(['page' => $this->first]); ?>">Start</a></li>
+        <li class="<?= (!isset($this->previous)) ? 'disabled' : ''; ?>"><a href="<?= $this->pimcoreUrl(['page' => $this->first]); ?>">Start</a></li>
   
         <!-- Previous page link -->
-        <li class="<?= (!isset($this->previous)) ? 'disabled' : ''; ?>"><a href="<?= $this->url(['page' => $this->previous]); ?>">&lt; Previous</a></li>
+        <li class="<?= (!isset($this->previous)) ? 'disabled' : ''; ?>"><a href="<?= $this->pimcoreUrl(['page' => $this->previous]); ?>">&lt; Previous</a></li>
  
         <!-- Numbered page links -->
         <?php foreach ($this->pagesInRange as $page): ?>
             <?php if ($page != $this->current): ?>
-                <li><a href="<?= $this->url(['page' => $page]); ?>"><?= $page; ?></a></li>
+                <li><a href="<?= $this->pimcoreUrl(['page' => $page]); ?>"><?= $page; ?></a></li>
             <?php else: ?>
                 <li class="disabled"><a href="#"><?= $page; ?></a></li>
             <?php endif; ?>
         <?php endforeach; ?>
          
         <!-- Next page link -->
-        <li class="<?= (!isset($this->next)) ? 'disabled' : ''; ?>"><a href="<?= $this->url(['page' => $this->next]); ?>">Next &gt;</a></li>
+        <li class="<?= (!isset($this->next)) ? 'disabled' : ''; ?>"><a href="<?= $this->pimcoreUrl(['page' => $this->next]); ?>">Next &gt;</a></li>
          
         <!-- Last page link -->
-        <li class="<?= (!isset($this->next)) ? 'disabled' : ''; ?>"><a href="<?= $this->url(['page' => $this->last]); ?>">End</a></li>
+        <li class="<?= (!isset($this->next)) ? 'disabled' : ''; ?>"><a href="<?= $this->pimcoreUrl(['page' => $this->last]); ?>">End</a></li>
          
     </ul>
  </div>
@@ -389,7 +394,7 @@ public function testAction( Request $request )
 ### Access and modify internal object list query
 
 It is possible to access and modify the internal query from every object listing. The internal query is based 
-on [Zend_Db_Select](http://framework.zend.com/manual/1.12/de/zend.db.select.html).
+on `\Pimcore\Db\ZendCompatibility\QueryBuilder`.
 ```php
 
 <?php
@@ -399,19 +404,20 @@ on [Zend_Db_Select](http://framework.zend.com/manual/1.12/de/zend.db.select.html
 $list = new Pimcore\Model\DataObject\News\Listing();
  
 // set onCreateQuery callback
-$list->onCreateQuery(function (Zend_Db_Select $query) use ($list) {
-    // join another table
-    $query->join(
+$list->onCreateQuery(
+    function (\Pimcore\Db\ZendCompatibility\QueryBuilder $select) {
+        $select->join(
         ['rating' => 'plugin_rating_ratings'],
         'rating.ratingTargetId = object_' . $list->getClassId() . '.o_id',
         ''
     );
-});
+    }
+);
 ```
 
 ### Debugging the Object List Query
 
-You can access and print the internal query which is based on [Zend_Db_Select](http://framework.zend.com/manual/1.12/de/zend.db.select.html) to debug your conditions like this:
+You can access and print the internal query which is based on `\Pimcore\Db\ZendCompatibility\QueryBuilder` to debug your conditions like this:
 
 ```php
 <?php
@@ -421,7 +427,7 @@ You can access and print the internal query which is based on [Zend_Db_Select](h
 $list = new Pimcore\Model\DataObject\News\Listing();
  
 // set onCreateQuery callback
-$list->onCreateQuery(function (Zend_Db_Select $query) use ($list) {
+$list->onCreateQuery(function (\Pimcore\Db\ZendCompatibility\QueryBuilder query) {
     // echo query
     echo $query;
 });

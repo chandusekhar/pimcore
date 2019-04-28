@@ -113,7 +113,7 @@ class S3Listener
         if(!$path) {
             if(!file_exists($fileSystemPath)) {
                 // the thumbnail doesn't exist yet, so we need to create it on request -> Thumbnail controller plugin
-                $path = str_replace(PIMCORE_TEMPORARY_DIRECTORY, "", $fileSystemPath);
+                $path = str_replace(PIMCORE_TEMPORARY_DIRECTORY."/image-thumbnails", "", $fileSystemPath);
             } else {
                 $path = str_replace(PIMCORE_TEMPORARY_DIRECTORY . "/", $this->s3TmpUrlPrefix . "/", $fileSystemPath);
             }
@@ -151,7 +151,7 @@ class S3Listener
 
 ## Customize the Storage Locations of Pimcore
 
-Create a new file named `/constants.php` in your document root and put the following code in it.
+Create a new file named `/constants.php` in `/app/constants.php` and put the following code in it.
 
 Again, please have a look at the comments in the code.
  
@@ -176,7 +176,6 @@ define("PIMCORE_TRANSFORMED_ASSET_URL", $s3BaseUrl . "/" . $s3BucketName . "/ass
 // the following paths should be private!
 define("PIMCORE_VERSION_DIRECTORY", $s3FileWrapperPrefix . "/versions");
 define("PIMCORE_RECYCLEBIN_DIRECTORY", $s3FileWrapperPrefix . "/recyclebin");
-define("PIMCORE_BACKUP_DIRECTORY", $s3FileWrapperPrefix . "/backup");
 define("PIMCORE_LOG_MAIL_PERMANENT", $s3FileWrapperPrefix . "/email");
 define("PIMCORE_LOG_FILEOBJECT_DIRECTORY", $s3FileWrapperPrefix . "/fileobjects");
 ```

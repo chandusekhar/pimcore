@@ -1,6 +1,6 @@
 # Showing Custom Layouts based on Object Data
 
-The event [`OBJECT_GET_PRE_SEND_DATA`](https://github.com/pimcore/pimcore/blob/master/pimcore/lib/Pimcore/Event/AdminEvents.php#L282-L292)
+The event [`OBJECT_GET_PRE_SEND_DATA`](https://github.com/pimcore/pimcore/blob/master/lib/Event/AdminEvents.php#L282-L292)
 can be used to manipulate the server response before object data is sent to Pimcore Backend UI when opening the detail
 view of an Pimcore object. 
 
@@ -59,13 +59,13 @@ class MyEventListener {
 
             switch ($hierarchyLevel) {
                 case "Article":
-                    $data = $this->doModifyCustomLayouts($data, 2, [0, 1]);
+                    $data = $this->doModifyCustomLayouts($data, $object, 2, [0, 1]);
                     break;
                 case "Color Variant":
-                    $data = $this->doModifyCustomLayouts($data, 1, [0, 2]);
+                    $data = $this->doModifyCustomLayouts($data, $object, 1, [0, 2]);
                     break;
                 default:
-                    $data = $this->doModifyCustomLayouts($data, 0, [1, 2]);
+                    $data = $this->doModifyCustomLayouts($data, $object, 0, [1, 2]);
                     break;
             }
             
@@ -77,14 +77,14 @@ class MyEventListener {
     /**
     * 
     */
-    private function doModifyCustomLayouts($data, $customLayoutToSelect = null, $layoutsToRemove = []) {
+    private function doModifyCustomLayouts($data, $object, $customLayoutToSelect = null, $layoutsToRemove = []) {
         
         if($customLayoutToSelect != null) {
             //set current layout to subcategory layout
             $data['currentLayoutId'] = $customLayoutToSelect;
             $customLayout = CustomLayout::getById($customLayoutToSelect);
             $data['layout'] = $customLayout->getLayoutDefinitions();
-            Service::enrichLayoutDefinition($data["layout"]);            
+            Service::enrichLayoutDefinition($data["layout"], $object);            
         }
         
         if(!empty($layoutsToRemove)) {

@@ -68,24 +68,27 @@ for further information).
  
 If you enable the `redis` cache configuration, the Redis cache will be used instead of the Doctrine one, even if Doctrine
 is enabled as well. 
+> **IMPORTANT!** It is crucial to test and verify your Redis configuration, if Pimcore is unable to connect to Redis, the entire system will stop working.
 
 If you want to use a custom cache pool, ignore the `pools` section (or disable both predefined pools) and set the `pool_service_id`
 entry to the service ID of your custom pool (needs to be defined as service on the service container). There are a couple
-of cache pools predefined in [cache.yml](https://github.com/pimcore/pimcore/blob/master/pimcore/lib/Pimcore/Bundle/CoreBundle/Resources/config/cache.yml)
+of cache pools predefined in [cache.yml](https://github.com/pimcore/pimcore/blob/master/bundles/CoreBundle/Resources/config/cache.yml)
 but those (array, filesystem) are mainly used for testing. 
 
 > If all of the predefined cache pools are disabled, the cache will fall back to a filesystem cache which is rather slow.
 
 
 ### Recommended Redis Configuration (`redis.conf`)
-
 ```
-maxmemory 1gb # depending on your data
-maxmemory-policy volatile-lru
+# select an appropriate value for your data
+maxmemory 768mb
+                   
+# IMPORTANT! Other policies will cause random inconsistencies of your data!
+maxmemory-policy volatile-lru   
 save ""
 ```
 
-> With the default settings, the minimum supported Redis version is 2.6.0 as it uses Redis' Lua scripting feature.
+> With the default settings, the minimum supported Redis version is 3.0.
 
 > Please note that the Redis adapter currently doesn't properly support Redis Cluster setups.
 

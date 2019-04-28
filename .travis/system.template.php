@@ -41,8 +41,6 @@ return [
             "days"  => null,
             "steps" => 10
         ],
-        "default_controller"      => "Default",
-        "default_action"          => "default",
         "error_pages"             => [
             "default" => "/error"
         ],
@@ -103,7 +101,7 @@ return [
             "name"  => "pimcore",
             "email" => "pimcore@example.com"
         ],
-        "method" => "mail",
+        "method" => "sendmail",
         "smtp"   => [
             "host" => "",
             "port" => "",
@@ -140,7 +138,7 @@ return [
             "name"  => "",
             "email" => ""
         ],
-        "method"      => null,
+        "method"      => 'sendmail',
         "smtp"        => [
             "host" => "",
             "port" => "",
